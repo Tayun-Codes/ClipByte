@@ -1,6 +1,14 @@
-// config/database.js
-module.exports = {
+const mongoose = require("mongoose");
 
-    'url' : 'mongodb+srv://tayunparkdev:Ha3NfWMqHBiS31fl@aws-test-cluster.tby5r.mongodb.net/demo?retryWrites=true&w=majority&appName=AWS-Test-Cluster', 
-    'dbName': 'demo'
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.DB_STRING);
+
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
 };
+
+module.exports = connectDB;
