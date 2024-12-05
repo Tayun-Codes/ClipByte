@@ -12,3 +12,14 @@ exports.getLoading = (req, res) => {
   };
 
 //
+
+
+module.exports = {
+  getUpload: async (req, res) => {
+    try {
+      res.render("upload.ejs");
+    } catch (err) {
+      console.log(err);
+    }
+  },
+}

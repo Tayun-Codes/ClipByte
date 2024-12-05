@@ -22,12 +22,39 @@
                   <br>
                   <input type="file" name="video" accept="video/*" required>
                   <br>
-                  <input id="clipButton" type="submit" value="Get those clips!" class="btn btn-default">
+                  <input id="clipButton" onclick="s3upload()" type="submit" value="Get those clips!" class="btn btn-default">
+                  <br>
+                  <progress max=”100” value=”0”></progress>
               </div>
           </form>
 </div>
 
 <script src="main.js"></script>
+<script type="text/javascript">
+    function s3upload() {
+       var files = document.getElementById('fileUpload').files;
+       if (files) 
+       {
+         var file = files[0];
+         var fileName = file.name;
+         var filePath = 'my-first-bucket-path/' + fileName;
+         var fileUrl = 'https://' + bucketRegion + '.amazonaws.com/my-    first-bucket/' +  filePath;
+         s3.upload({
+            Key: filePath,
+            Body: file,
+            ACL: 'public-read'
+            }, function(err, data) {
+            if(err) {
+            reject('error');
+            }
+            alert('Successfully Uploaded!');
+            }).on('httpUploadProgress', function (progress) {
+            var uploaded = parseInt((progress.loaded * 100) / progress.total);
+            $("progress").attr('value', uploaded);
+          });
+       }
+    };
+    </script>
 
 </body>
 </html>
