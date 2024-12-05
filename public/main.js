@@ -1,4 +1,9 @@
-var getClips = document.getElementById('clipButton').addEventListener("click", addWaiting);
+alert('hello')
+// const aws = require("../middleware/aws");
+// import aws from './../middleware/aws.js'
+// const s3 = new aws.S3(); //older sdk syntax
+
+// var getClips = document.getElementById('clipButton').addEventListener("click", addWaiting);
 
 function addWaiting(e) {
   const form = document.getElementById('uploadForm')
@@ -7,11 +12,48 @@ function addWaiting(e) {
   form.appendChild(waiting)
 }
 
+// //copied from ejs
+// var bucketName = 'clipbyte-test';
+// const credentials = new aws.Credentials({
+//   accessKeyId: accessKeyId,
+//   secretAccessKey: secretAccessKeyId
+// });
+// aws.config.update({
+//   region: 'us-east-2',
+//   credentials: credentials
+// });
 
+// var s3 = new aws.S3({
+//   params: { Bucket: bucketName }
+// });
 
-
-
-
+// function s3upload() {
+//   var files = document.getElementById('fileUpload').files; //not copied over
+//   if (files) {
+//       var file = files[0];
+//       var fileName = file.name;
+//       var filePath = 'clipbyte-test/' + fileName;
+//       var params = {
+//           Key: filePath,
+//           Body: file,
+//       };
+//       fetch ('/uploading')
+//       // s3.upload(params, function (err, data) {
+//       //     if (err) {
+//       //         console.error('Upload Error:', err);
+//       //         alert('Failed to upload file.');
+//       //         return;
+//       //     }
+//       //     alert('Successfully Uploaded! File URL: ' + data.Location);
+//       // }).on('httpUploadProgress', function (progress) {
+//       //     var uploaded = parseInt((progress.loaded * 100) / progress.total);
+//       //     document.querySelector("progress").value = uploaded;
+//       //     console.log('Upload Progress:', uploaded + '%');
+//       // });
+//   } else {
+//       alert('No file selected.');
+//   }
+// };
 
 
 

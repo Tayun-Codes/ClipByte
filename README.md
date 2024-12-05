@@ -1,3 +1,7 @@
+attempts to move client side functions that upload videos to aws bucket
+files changed: views/upload.ejs, public/main.js, routs/main.js, controllers/upload.js
+incomplete d/t solution being multer but multer proposes a security risk -- need to find workaround, if any
+
 # ClipByte
 A program to help content creators diversify their platforms by automating short-form clips from long videos.
 

@@ -13,7 +13,7 @@ const { ensureAuth, ensureGuest } = require("../middleware/auth");
 router.get("/", homeController.getIndex);
 // router.get("/", awsController.listBuckets);
 router.get("/upload", ensureAuth, uploadController.getUpload); 
-//router.post("/upload", uploadController.getLoading); //post aws
+router.post("/uploading", uploadController.s3upload);
 router.get("/completed", );
 // router.get("/feed", ensureAuth, postsController.getFeed);
 router.get("/login", authController.getLogin);
