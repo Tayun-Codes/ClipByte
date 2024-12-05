@@ -1,60 +1,86 @@
 <!doctype html>
 <html>
+
+<!-- https://medium.com/@shresthshruti09/uploading-files-in-aws-s3-bucket-through-javascript-sdk-with-progress-bar-d2a4b3ee77b5 -->
+
 <head>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.24.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript">
+        //Bucket Configurations
+        var bucketName = 'clipbyte-test';
+
+        const credentials = new AWS.Credentials({
+            accessKeyId: '',
+            secretAccessKey: ''
+        });
+
+        AWS.config.update({
+            region: 'us-east-2',
+            credentials: credentials
+        });
+
+        var s3 = new AWS.S3({
+            params: { Bucket: bucketName }
+        });
+    </script>
+
     <title>Demo Day</title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<div class="container">
+    <!-- A functional html code-->
+    <div><input type="file" id="fileUpload"></div>
+    <div><button onclick="s3upload()">Submit</button></div>
+    <progress max=”100” value=”0”></progress>
+    
+    <script type="text/javascript">
+        function s3upload() {
+            var files = document.getElementById('fileUpload').files;
+            if (files) {
+                var file = files[0];
+                var fileName = file.name;
+                var filePath = 'clipbyte-test/' + fileName;
+                // var fileUrl = 'https://' + 'us-east-2' + '.amazonaws.com/my-first-bucket/' + filePath;
 
-    <div class="page-header text-center">
-        <h1>Upload!</h1>
-        <a href="/logout" class="btn btn-default btn-sm">Logout</a>
-    </div>
+                // s3.upload({
+                //     Key: filePath,
+                //     Body: file,
+                // }, function (err, data) {
+                //     if (err) {
+                //         console.log(err);
+                //     }
+                //     alert('Successfully Uploaded!');
+                // }).on('httpUploadProgress', function (progress) {
+                //     var uploaded = parseInt((progress.loaded * 100) / progress.total);
+                //     $("progress").attr('value', uploaded);
+                // });
 
-    <div class="row">
-        <div class="col-sm-12">
-          <form action="/upload" enctype="multipart/form-data" method="POST">
-              <div id= "uploadForm" class="form-group">
-                  <input type="text" class="form-control" placeholder="Filename" name="title" required>
-                  <br>
-                  <input type="file" name="video" accept="video/*" required>
-                  <br>
-                  <input id="clipButton" onclick="s3upload()" type="submit" value="Get those clips!" class="btn btn-default">
-                  <br>
-                  <progress max=”100” value=”0”></progress>
-              </div>
-          </form>
-</div>
+                var params = {
+                    Key: filePath,
+                    Body: file,
+                };
 
-<script src="main.js"></script>
-<script type="text/javascript">
-    function s3upload() {
-       var files = document.getElementById('fileUpload').files;
-       if (files) 
-       {
-         var file = files[0];
-         var fileName = file.name;
-         var filePath = 'my-first-bucket-path/' + fileName;
-         var fileUrl = 'https://' + bucketRegion + '.amazonaws.com/my-    first-bucket/' +  filePath;
-         s3.upload({
-            Key: filePath,
-            Body: file,
-            ACL: 'public-read'
-            }, function(err, data) {
-            if(err) {
-            reject('error');
+                s3.upload(params, function (err, data) {
+                    if (err) {
+                        console.error('Upload Error:', err);
+                        alert('Failed to upload file.');
+                        return;
+                    }
+                    alert('Successfully Uploaded! File URL: ' + data.Location);
+                }).on('httpUploadProgress', function (progress) {
+                    var uploaded = parseInt((progress.loaded * 100) / progress.total);
+                    document.querySelector("progress").value = uploaded;
+                    console.log('Upload Progress:', uploaded + '%');
+                });
+            } else {
+                alert('No file selected.');
             }
-            alert('Successfully Uploaded!');
-            }).on('httpUploadProgress', function (progress) {
-            var uploaded = parseInt((progress.loaded * 100) / progress.total);
-            $("progress").attr('value', uploaded);
-          });
-       }
-    };
+        };
     </script>
-
 </body>
+
 </html>
