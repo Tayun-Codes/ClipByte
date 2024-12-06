@@ -16,14 +16,13 @@ ClipByte is built using the following technologies:
 - **JavaScript (JS)**: Employed for both client and server-side functionality.
 
 **Key Packages Used**:
-
 - **express**: Provides a framework for building the web application.
-- **aws**: 
-- **multer-s3**: Easily uploads and retrieves media data, specifically for Amazon S3; similar to multer
+- **aws-sdk**: Accesses S3 buckets for cloud storage and manipulation of large video files
+- **remotion packages incoming**
 
 # What I Learned
-- Multer to store user and movie specific data
-- Code Organization to clearly route client and server side data
+- Model, Views, Controller (MVC) framework to organize code for easier readability, clearly routing client and server side data
+- How to access and manipulate Amazon Web Services S3 cloud storage buckets
 
 # Have fun!
 Interact and play with this full-stack app [here]!
@@ -34,14 +33,12 @@ Interact and play with this full-stack app [here]!
 `npm install`
 
 ## Things to add
-
 - Create a `.env` file in config folder and add the following as `key = value`
   - PORT = 2121 (can be any port example: 3000)
   - DB_STRING = `your database URI`
-  - CLOUD_NAME = `your cloudinary cloud name`
-  - API_KEY = `your cloudinary api key`
-  - API_SECRET = `your cloudinary api secret`
+  - ACCESS_KEY = `your AWS access key`
+  - SECRET_ACCESS_KEY = `your AWS secret access key`
+  - REGION = `your AWS region`
 
 ## Run
-
 `npm start`

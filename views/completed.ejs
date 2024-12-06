@@ -28,7 +28,7 @@
             </div>
         </div>
         <% for(let i=0; i < clips.length; i++) {%>
-            <div class="post">
+            <div class="clips">
                 <span class="title"> <%= clips[i].title %> </span>
                 <img src="data:image/jpeg;base64,<%= clips[i].src.toString('base64') %>" alt="<%= info[i].description %>" title="<%= info[i].description %>">
                 <div class="options">

@@ -6,4 +6,14 @@ img{
   height: 200px;
 }
 
+.form-control {
+  width: 60%;
+}
+
+progress {
+  margin-top: 10px;
+  height: 30px;
+  vertical-align: -0.75em;
+}
+
 /* change font and ejs bootstrap? */
