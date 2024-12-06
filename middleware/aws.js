@@ -2,10 +2,13 @@ const aws = require("aws-sdk");
 
 require("dotenv").config({ path: "./config/.env" });
 
-aws.config.update({
-    accessKeyId: process.env.ACCESS_KEY,
-    secretAccessKeyId: process.env.SECRET_ACCESS_KEY,
-    region: process.env.REGION
-});  
+const awsKeys = (req, res, next) => {
+    res.locals.key = {
+        accessKeyId: process.env.ACCESS_KEY,
+        secretAccessKey: process.env.SECRET_ACCESS_KEY,
+        region: process.env.REGION
+    };
+    next();
+};  
 
-module.exports = aws;
+module.exports = awsKeys;

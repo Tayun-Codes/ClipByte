@@ -7,16 +7,17 @@
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.24.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script type="text/javascript">
+        alert('uploadejs')
         //Bucket Configurations
         var bucketName = 'clipbyte-test';
 
         const credentials = new AWS.Credentials({
-            accessKeyId: '',
-            secretAccessKey: ''
+            accessKeyId: '<%= key.accessKeyId %>',
+            secretAccessKey: '<%= key.secretAccessKey %>'
         });
 
         AWS.config.update({
-            region: 'us-east-2',
+            region: '<%= key.region %>',
             credentials: credentials
         });
 
@@ -32,55 +33,93 @@
 </head>
 
 <body>
-    <!-- A functional html code-->
-    <div><input type="file" id="fileUpload"></div>
-    <div><button onclick="s3upload()">Submit</button></div>
-    <progress max=”100” value=”0”></progress>
-    
-    <script type="text/javascript">
-        function s3upload() {
-            var files = document.getElementById('fileUpload').files;
-            if (files) {
-                var file = files[0];
-                var fileName = file.name;
-                var filePath = 'clipbyte-test/' + fileName;
-                // var fileUrl = 'https://' + 'us-east-2' + '.amazonaws.com/my-first-bucket/' + filePath;
 
-                // s3.upload({
-                //     Key: filePath,
-                //     Body: file,
-                // }, function (err, data) {
-                //     if (err) {
-                //         console.log(err);
-                //     }
-                //     alert('Successfully Uploaded!');
-                // }).on('httpUploadProgress', function (progress) {
-                //     var uploaded = parseInt((progress.loaded * 100) / progress.total);
-                //     $("progress").attr('value', uploaded);
-                // });
+    <div class="container">
 
-                var params = {
-                    Key: filePath,
-                    Body: file,
+        <div class="page-header text-center">
+            <h1>Upload!</h1>
+            <a href="/logout" class="btn btn-default btn-sm">Logout</a>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-offset-3">
+                <div id="uploadForm" class="form-group">
+
+                    <input type="text" class="form-control" placeholder="Filename" name="title" required>
+                    <br>
+                    <input id="fileUpload" type="file" name="video" accept="video/*" required>
+                    <br>
+                    <input id="clipButton" onclick="s3upload()" type="submit" value="Get those clips!"
+                        class="btn btn-default">
+                    <br>
+                    <label>Uploading: <progress max='100' value='0'>0%</progress></label>
+
+                </div>
+            </div>
+
+
+            <script type="text/javascript">
+                function s3upload() {
+                    const stopwatch = new Stopwatch()
+                    var files = document.getElementById('fileUpload').files;
+                    if (files) {
+                        var file = files[0];
+                        var fileName = file.name;
+                        var filePath = 'clipbyte-test/' + fileName; // want to incorporate the user id into the filePath using </%= user._id %/>
+                        var params = {
+                            Key: filePath,
+                            Body: file,
+                        };
+                        stopwatch.start()
+                        s3.upload(params, function (err, data) {
+                            if (err) {
+                                console.error('Upload Error:', err);
+                                alert('Failed to upload file.');
+                                return;
+                            }
+                            stopwatch.end()
+                            alert('Successfully Uploaded! File URL: ' + data.Location);
+                        }).on('httpUploadProgress', function (progress) {
+                            var uploaded = parseInt((progress.loaded * 100) / progress.total);
+                            document.querySelector("progress").value = uploaded;
+                            console.log('Upload Progress:', uploaded + '%');
+                        });
+                    } else {
+                        alert('No file selected.');
+                    }
                 };
 
-                s3.upload(params, function (err, data) {
-                    if (err) {
-                        console.error('Upload Error:', err);
-                        alert('Failed to upload file.');
-                        return;
+                function Stopwatch() {
+                    let start, end, running, duration = 0;
+                    Object.defineProperty(this, 'duration', {
+                        get: function () { return duration }
+                    });
+                    this.reset = function () {
+                        start = null;
+                        end = null;
+                        running = false;
+                        duration = 0;
                     }
-                    alert('Successfully Uploaded! File URL: ' + data.Location);
-                }).on('httpUploadProgress', function (progress) {
-                    var uploaded = parseInt((progress.loaded * 100) / progress.total);
-                    document.querySelector("progress").value = uploaded;
-                    console.log('Upload Progress:', uploaded + '%');
-                });
-            } else {
-                alert('No file selected.');
-            }
-        };
-    </script>
+                    this.start = function () {
+                        if (running) {
+                            throw new Error('stopwatch started')
+                        }
+                        running = true;
+                        start = new Date();
+                        console.log('Stopwatch started')
+                    }
+                    this.end = function () {
+                        if (!running)
+                            throw new Error('stopwatch not started');
+                        running = false;
+                        end = new Date();
+                        const seconds = (end.getTime() - start.getTime()) / 1000;
+                        duration += seconds;
+                        console.log('Stopwatch stopped')
+                        console.log(duration)
+                    }
+                }
+            </script>
 </body>
 
 </html>

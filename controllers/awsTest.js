@@ -1,6 +1,7 @@
 const aws = require("../middleware/awsTest");
 const s3 = new aws.S3(); //older sdk syntax
 
+//written and used to initially test correct access of the aws-sdk package and to the cloud&bucket
 module.exports = {
     listBuckets: async () => {
         try {
