@@ -4,7 +4,7 @@ const authController = require("../controllers/auth");
 const homeController = require("../controllers/index");
 // const postsController = require("../controllers/posts");
 const uploadController = require("../controllers/upload");
-// const awsController = require("../controllers/aws");
+const transcribeController = require('../controllers/transcribe');
 
 const { ensureAuth, ensureGuest } = require("../middleware/auth");
 const awsKeys = require("../middleware/aws");
@@ -13,9 +13,8 @@ const awsKeys = require("../middleware/aws");
 //Main Routes - simplified for now
 router.get("/", homeController.getIndex);
 router.get("/upload", ensureAuth, awsKeys, uploadController.getUpload);
-//router.post("/upload", uploadController.getLoading); //post aws
+router.post('/transcribeKey', transcribeController.transcribeFile)
 router.get("/completed", );
-// router.get("/feed", ensureAuth, postsController.getFeed);
 router.get("/login", authController.getLogin);
 router.post("/login", authController.postLogin);
 router.get("/logout", authController.logout);

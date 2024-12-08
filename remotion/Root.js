@@ -1,0 +1,18 @@
+import {Composition} from 'remotion';
+import {MyComposition} from './Composition';
+
+//adjust prn / clip
+export const RemotionRoot = () => {
+  return (
+    <>
+      <Composition
+        id="Empty"
+        component={MyComposition}
+        durationInFrames={60}
+        fps={30}
+        width={1280}
+        height={720}
+      />
+    </>
+  );
+};

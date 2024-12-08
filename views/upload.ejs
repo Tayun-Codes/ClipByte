@@ -7,17 +7,16 @@
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.24.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script type="text/javascript">
-        alert('uploadejs')
         //Bucket Configurations
-        var bucketName = 'clipbyte-test';
+        var bucketName = '<%= keys.bucketName %>';
 
         const credentials = new AWS.Credentials({
-            accessKeyId: '<%= key.accessKeyId %>',
-            secretAccessKey: '<%= key.secretAccessKey %>'
+            accessKeyId: '<%= keys.accessKeyId %>',
+            secretAccessKey: '<%= keys.secretAccessKey %>'
         });
 
         AWS.config.update({
-            region: '<%= key.region %>',
+            region: '<%= keys.region %>',
             credentials: credentials
         });
 
@@ -51,20 +50,22 @@
                     <input id="clipButton" onclick="s3upload()" type="submit" value="Get those clips!"
                         class="btn btn-default">
                     <br>
-                    <label>Uploading: <progress max='100' value='0'>0%</progress></label>
+                    <label>Uploading: <progress id="uploadProgress" max='100' value='0'>0%</progress></label>
+                    <label>Transcribing: <progress id= "transcribeProgress" max='100' value='0'>0%</progress></label>
 
                 </div>
             </div>
 
-
+            <!-- in client-side s3upload function -->
             <script type="text/javascript">
                 function s3upload() {
+                    //stopwatch 
                     const stopwatch = new Stopwatch()
                     var files = document.getElementById('fileUpload').files;
                     if (files) {
                         var file = files[0];
                         var fileName = file.name;
-                        var filePath = 'clipbyte-test/' + fileName; // want to incorporate the user id into the filePath using </%= user._id %/>
+                        var filePath = fileName;
                         var params = {
                             Key: filePath,
                             Body: file,
@@ -78,9 +79,29 @@
                             }
                             stopwatch.end()
                             alert('Successfully Uploaded! File URL: ' + data.Location);
+
+                            //saves the key to the backend to be used in fetching URLs for bucket objects
+                            //untested
+                            fetch('/transcribeKey', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json',},
+                                body: JSON.stringify({
+                                    Key: filePath,
+                                }),
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    console.log('Key saved', data);
+                                })
+                                .catch(error => {
+                                    console.error('Error sending Key', error);
+                                });
+
+                        //updates progress bar
                         }).on('httpUploadProgress', function (progress) {
                             var uploaded = parseInt((progress.loaded * 100) / progress.total);
-                            document.querySelector("progress").value = uploaded;
+                            document.getElementById("uploadProgress").value = uploaded;
+                            document.getElementById("uploadProgress").label = uploaded + '%';
                             console.log('Upload Progress:', uploaded + '%');
                         });
                     } else {

@@ -12,6 +12,12 @@ pids
 logs
 results
 
+ffmpeg.exe
+ffprobe.exe
+
+transcribeFiles
+whisper.cpp
+
 npm-debug.log
 node_modules
 
