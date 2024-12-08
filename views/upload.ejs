@@ -51,8 +51,12 @@
                         class="btn btn-default">
                     <br>
                     <label>Uploading: <progress id="uploadProgress" max='100' value='0'>0%</progress></label>
-                    <label>Transcribing: <progress id= "transcribeProgress" max='100' value='0'>0%</progress></label>
-
+                    <br>
+                    <label>Transcribing: <progress id="transcribeProgress" max='100' value='0'>0%</progress></label>
+                    <br>
+                    <label>Finding fun moments: <progress id="openAiProgress" max='100' value='0'>0%</progress></label>
+                    <br>
+                    <label>Getting those clips: <progress id="remotionProgress" max='100' value='0'>0%</progress></label>
                 </div>
             </div>
 
@@ -84,7 +88,7 @@
                             //untested
                             fetch('/transcribeKey', {
                                 method: 'POST',
-                                headers: {'Content-Type': 'application/json',},
+                                headers: { 'Content-Type': 'application/json', },
                                 body: JSON.stringify({
                                     Key: filePath,
                                 }),
@@ -92,12 +96,13 @@
                                 .then(response => response.json())
                                 .then(data => {
                                     console.log('Key saved', data);
+                                    listenForTranscriptionProgress();
                                 })
                                 .catch(error => {
                                     console.error('Error sending Key', error);
                                 });
 
-                        //updates progress bar
+                            //updates progress bar
                         }).on('httpUploadProgress', function (progress) {
                             var uploaded = parseInt((progress.loaded * 100) / progress.total);
                             document.getElementById("uploadProgress").value = uploaded;
@@ -138,6 +143,32 @@
                         console.log('Stopwatch stopped')
                         console.log(duration)
                     }
+                }
+
+                //updates the transcription progress bar
+                function listenForTranscriptionProgress() {
+                    const transcribeProgressBar = document.getElementById('transcribeProgress');
+
+                    // Open an EventSource connection to receive progress updates
+                    const eventSource = new EventSource('/transcribeProgress');
+
+                    eventSource.onmessage = function (event) {
+                        const data = JSON.parse(event.data);
+                        const progress = data.progress || 0;
+                        console.log('Progress update received:', progress);
+                        transcribeProgressBar.value = progress;
+                        console.log('Transcription Progress:', progress + '%');
+
+                        if (progress === 100) {
+                            eventSource.close(); // Close the connection when complete
+                            alert('Transcription complete!');
+                        }
+                    };
+
+                    eventSource.onerror = function () {
+                        console.error('Error connecting to progress endpoint.');
+                        eventSource.close();
+                    };
                 }
             </script>
 </body>

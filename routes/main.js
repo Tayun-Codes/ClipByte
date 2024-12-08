@@ -14,6 +14,7 @@ const awsKeys = require("../middleware/aws");
 router.get("/", homeController.getIndex);
 router.get("/upload", ensureAuth, awsKeys, uploadController.getUpload);
 router.post('/transcribeKey', transcribeController.transcribeFile)
+router.get('/transcribeProgress', transcribeController.getProgress);
 router.get("/completed", );
 router.get("/login", authController.getLogin);
 router.post("/login", authController.postLogin);

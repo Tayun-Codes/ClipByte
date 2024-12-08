@@ -1,3 +1,8 @@
+The transcribing progress bar only updates once the entire transcription process is done.
+There are attempts to make the transcribing process asynchronous in order to update the progress value whenever the value is received.
+Changes made in controllers/transcribe.js, routes/main.js and views/upload.ejs
+Not currently working yet but seems possible?
+
 # ClipByte
 A program to help content creators diversify their platforms by automating short-form clips from long videos.
 
@@ -20,7 +25,7 @@ ClipByte is built using the following technologies:
 - **aws-sdk**: Accesses S3 buckets for cloud storage and manipulation of large video files
 - **fluent-ffmpeg**: Command-line conversion of mp4 to wav files. Used for Remotion's transcribe function which requires wav files.
 - **@remotion/install-whisper-cpp**: Use of transcribe to retrieve a transcription of the user's video in order to be analyzed by OpenAI for clippable moments.
--**OpenAI**
+- **OpenAI**
 - **remotion packages incoming**
 
 # What I Learned
@@ -35,7 +40,9 @@ ClipByte is built using the following technologies:
 
 # If you would like to use this codebase
 Run at your own risk!
-There are a lot of missing components due to file size. This program is also quite CPU intensive. I have an i7-14700K and at times this program eats up to 30% of my CPU.
+There are a lot of missing components due to file size.
+
+This program is also quite CPU intensive. I have an i7-14700K and at times this program eats up to 30% of my CPU.
 
 ## Notes before running
 ### Remotion/Whisper-cpp
@@ -47,12 +54,16 @@ const { transcription } = await transcribe({
     inputPath: 'absolutePath.wav'
     whisperPath: 'absolutePath/endswith/whisper.cpp'
 ```
-Whisper.cpp is not included in this codebase.
+Whisper.cpp is not included in this codebase because it is very large.
 Installation and documentation for whisper.cpp can be found here : https://www.remotion.dev/docs/install-whisper-cpp/install-whisper-cpp
 
 ### Fluent ffmpeg
-Fluent ffmpeg requires ffmpeg.exe and ffprobe.exe to be downloaded into the root folder so that the command line can be accessed for fluent-ffmpeg to convert mp4 files to wav.
+Fluent ffmpeg requires ffmpeg.exe and ffprobe.exe to be downloaded into the root folder so that the command line can be accessed for fluent-ffmpeg to convert mp4 files to wav. These files were too large to be uploaded to Github.
 Documentation for node's fluent-ffmpeg can be found here : https://www.npmjs.com/package/fluent-ffmpeg
 
 ### Run
 `npm start`
+
+
+# Oh you're at the end!
+Brownie points for you :)
