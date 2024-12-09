@@ -1,46 +1,66 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
+
 <head>
     <title>Demo Day</title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-<div class="container">
 
-    <div class="page-header text-center">
-        <h1>Upload!</h1>
-        <a href="/logout" class="btn btn-default btn-sm">Logout</a>
+<body>
+    <div class="container">
+
+        <div class="page-header text-center">
+            <h1>Clips!</h1>
+            <a href="/logout" class="btn btn-default btn-sm">Logout</a>
+        </div>
+
+        <!-- <script type="module">
+        import { Player } from "https://cdn.jsdelivr.net/npm/@remotion/player/dist/index.esm.js";
+        const { RemotionVideo } = ${JSON.stringify(RemotionVideo())};
+
+        const playerContainer = document.getElementById('player');
+        RemotionVideo.forEach((clip) => {
+          const player = Player({
+            component: clip.component,
+            compositionWidth: clip.width,
+            compositionHeight: clip.height,
+            durationInFrames: clip.durationInFrames,
+            fps: clip.fps,
+            controls: true,
+          });
+          playerContainer.appendChild(player);
+        });
+      </script> -->
+
+        <!-- this does not use remotions video player but actually embeds a video with the start and end point! would be good to use jic i cant get the player working -->
+        <!-- <div id="clips">
+    <% clips.forEach(clip => { %>
+      <h2><%= clip.id %> (Duration: <%= clip.duration %> seconds)</h2>
+      <video controls>
+        <source src="<%= clip.src %>#t=<%= clip.start %>,<%= clip.end %>" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    <% }) %>
+  </div> -->
+
+
+        <div id="clips">
+            <% clips.forEach(clip=> { %>
+                <h2>
+                    <%= clip.id %> (Duration: <%= clip.duration %> seconds)
+                </h2>
+                <video controls>
+                    <source src="<%= clip.src %>#t=<%= clip.start %>,<%= clip.end %>" type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
+                <% }) %>
+        </div>
     </div>
 
-    <div class="row">
-
-        <!-- LOCAL INFORMATION -->
-        <div class="col-sm-6">
-            <div class="well">
-                <h3><span class="fa fa-user"></span> Local</h3>
-                    <p>
-                        <strong>id</strong>: <%= user._id %><br>
-                        <strong>email</strong>: <%= user.local.email %><br>
-                        <strong>password</strong>: <%= user.local.password %>
-                    </p>
-            </div>
-        </div>
-        <% for(let i=0; i < clips.length; i++) {%>
-            <div class="clips">
-                <span class="title"> <%= clips[i].title %> </span>
-                <img src="data:image/jpeg;base64,<%= clips[i].src.toString('base64') %>" alt="<%= info[i].description %>" title="<%= info[i].description %>">
-                <div class="options">
-                    <span> <%= clips[i].likes %> </span>
-                    <span><i class="fa fa-heart" aria-hidden="true"></i></span>
-                    <span><i class='fa fa-trash' aria-hidden="true"></i></span>
-                </div>
-            </div>
-        <% } %>
-</div>
-
-<script src="main.js"></script>
+    <script src="main.js"></script>
 
 </body>
+
 </html>

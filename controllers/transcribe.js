@@ -3,6 +3,8 @@ const { transcribe } = require('@remotion/install-whisper-cpp');
 const aws = require("aws-sdk");
 const fs = require('fs');
 var ffmpeg = require('fluent-ffmpeg');
+const openAiController = require('../controllers/openai');
+
 // const Transcription = require("../models/Transcription"); //for saving to mongodb but untested & not in use
 
 
@@ -74,9 +76,11 @@ module.exports = {
                     // const savedTranscription = await Transcription.create({ key: Key, transcription: transcription });
                     // console.log('Transcription saved to MongoDB:', savedTranscription);
 
-
-                    res.status(200).json({ transcription }); //the transcription needs to go to OpenAI
+                    res.status(200).json({ transcription }); 
+                    openAiController.analyzeForClips(Key);
                     console.log('Conversion completed!');
+
+                    //need to call openai and send the key
                 })
                 .on('error', (err) => {
                     console.error('An error occurred:', err.message);
@@ -129,7 +133,7 @@ async function downloadFileFromS3(filePath, localFilePath) {
 //hardcoding to see if transcription works
 function transcribeFile() {
     console.log('transcribeFile running')
-    const windowsLocalFile = `.\\transcribeFiles\\test.mp4` //spaces are fine in the file name
+    const windowsLocalFile = `.\\transcribeFiles\\long 2.5hr stream.mkv` //spaces are fine in the file name
     ffmpeg(windowsLocalFile)
         .audioCodec('pcm_s16le')    // Use the WAV codec
         .audioFrequency(16000)      // Set the sample rate to 16kHz
@@ -141,12 +145,16 @@ function transcribeFile() {
         })
         .on('end', async () => {
             const { transcription } = await transcribe({
-                // inputPath: `E:\\Resilient_Coders\\Homework\\Github\\ClipByte\\transcribeFiles\\test.mp4-audio.wav`, //only absolute paths are working?
-                inputPath: path.resolve(__dirname, '..\\transcribeFiles\\test.mp4-audio.wav'),
+                // inputPath: `E:\\Resilient_Coders\\Homework\\Github\\ClipByte\\transcribeFiles\\The Archives Ep. Thanksgiving 2024 (video).mp4-audio.wav`, //only absolute paths are working?
+                inputPath: path.resolve(__dirname, '..\\transcribeFiles\\long 2.5hr stream.mkv-audio.wav'),
                 // whisperPath: 'E:\\Resilient_Coders\\Homework\\Github\\ClipByte\\remotion\\whisper.cpp',
                 whisperPath: path.resolve(__dirname, '..\\remotion\\whisper.cpp'),
-                model: 'medium.en'
+                model: 'large-v3'
             });
+
+            const jsonFilePath = `./transcribeFiles/long 2.5hr stream.mkv.json`;
+                    fs.writeFileSync(jsonFilePath, JSON.stringify({ transcription }, null, 2), 'utf-8'); //null = no modifications, 2 = 2 spaces for easier readibility
+                    console.log(`Transcription saved to ${jsonFilePath}`);
             console.log('200', transcription)
             console.log('Conversion completed!');
         })
@@ -156,4 +164,4 @@ function transcribeFile() {
         .save(`${windowsLocalFile}-audio.wav`); // Save the output file (not in order)
 };
 //runs the function on server load
-// transcribeFile()
+transcribeFile()

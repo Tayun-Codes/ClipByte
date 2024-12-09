@@ -27,6 +27,7 @@
     "mongodb": "^3.6.5",
     "mongoose": "^8.8.4",
     "morgan": "^1.10.0",
+    "openai": "^4.76.0",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
     "path-to-regexp": "^8.2.0",
