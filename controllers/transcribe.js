@@ -64,21 +64,30 @@ module.exports = {
                         inputPath: path.resolve(__dirname, `.${localFilePath}-audio.wav`),
                         //gets the url but fetches it with the credentials
                         whisperPath: path.resolve(__dirname, '../remotion/whisper.cpp'),
-                        model: 'medium.en', //what is this?
+                        model: 'large-v3', //tiny, tiny.en, base, base.en, small, small.en, medium, medium.en, large-v1, large-v2, large-v3, large-v3-turbo
                     });
                     
+                    const filteredTranscription = transcription.map(entry => {
+                        const { tokens, ...rest } = entry; // Destructure to exclude the tokens field
+                        return rest; // Return the modified object
+                    });
+
                     //save transctiption as a local json
                     const jsonFilePath = `./transcribeFiles/${Key}.json`;
-                    fs.writeFileSync(jsonFilePath, JSON.stringify({ transcription }, null, 2), 'utf-8'); //null = no modifications, 2 = 2 spaces for easier readibility
+
+
+                    fs.writeFileSync(jsonFilePath, JSON.stringify({ filteredTranscription }, null, 2), 'utf-8'); //null = no modifications, 2 = 2 spaces for easier readibility
                     console.log(`Transcription saved to ${jsonFilePath}`);
 
-                    //save transcription to mongodb in theory... untested
+                    //save transcription to mongodb?... untested
                     // const savedTranscription = await Transcription.create({ key: Key, transcription: transcription });
                     // console.log('Transcription saved to MongoDB:', savedTranscription);
 
-                    res.status(200).json({ transcription }); 
-                    openAiController.analyzeForClips(Key);
-                    console.log('Conversion completed!');
+                    res.status(200).json({ filteredTranscription }); 
+                    console.log('Conversion & transcription completed!');
+
+                    videoController.processVideo(Key);
+                    console.log('openAIcontroller called');
 
                     //need to call openai and send the key
                 })
@@ -127,13 +136,10 @@ async function downloadFileFromS3(filePath, localFilePath) {
 }
 
 
-
-
-
 //hardcoding to see if transcription works
 function transcribeFile() {
     console.log('transcribeFile running')
-    const windowsLocalFile = `.\\transcribeFiles\\long 2.5hr stream.mkv` //spaces are fine in the file name
+    const windowsLocalFile = `.\\transcribeFiles\\The Archives Ep. Thanksgiving 2024 (video).mp4` //spaces are fine in the file name
     ffmpeg(windowsLocalFile)
         .audioCodec('pcm_s16le')    // Use the WAV codec
         .audioFrequency(16000)      // Set the sample rate to 16kHz
@@ -146,17 +152,33 @@ function transcribeFile() {
         .on('end', async () => {
             const { transcription } = await transcribe({
                 // inputPath: `E:\\Resilient_Coders\\Homework\\Github\\ClipByte\\transcribeFiles\\The Archives Ep. Thanksgiving 2024 (video).mp4-audio.wav`, //only absolute paths are working?
-                inputPath: path.resolve(__dirname, '..\\transcribeFiles\\long 2.5hr stream.mkv-audio.wav'),
+                inputPath: path.resolve(__dirname, '..\\transcribeFiles\\The Archives Ep. Thanksgiving 2024 (video).mp4-audio.wav'),
                 // whisperPath: 'E:\\Resilient_Coders\\Homework\\Github\\ClipByte\\remotion\\whisper.cpp',
                 whisperPath: path.resolve(__dirname, '..\\remotion\\whisper.cpp'),
-                model: 'large-v3'
+                model: 'large-v2'
             });
 
-            const jsonFilePath = `./transcribeFiles/long 2.5hr stream.mkv.json`;
-                    fs.writeFileSync(jsonFilePath, JSON.stringify({ transcription }, null, 2), 'utf-8'); //null = no modifications, 2 = 2 spaces for easier readibility
-                    console.log(`Transcription saved to ${jsonFilePath}`);
-            console.log('200', transcription)
-            console.log('Conversion completed!');
+            const filteredTranscription = transcription.map(entry => {
+                const { tokens, offsets, ...rest } = entry; // Destructure to exclude the tokens field
+                return rest; // Return the modified object
+            });
+
+            //save transctiption as a local json
+            const jsonFilePath = `./transcribeFiles/The Archives Ep. Thanksgiving 2024 (video).mp4 filtered NO OFFSETS.json`;
+
+
+            fs.writeFileSync(jsonFilePath, JSON.stringify({ filteredTranscription }, null, 2), 'utf-8'); //null = no modifications, 2 = 2 spaces for easier readibility
+            console.log(`Transcription saved to ${jsonFilePath}`);
+
+            //save transcription to mongodb?... untested
+            // const savedTranscription = await Transcription.create({ key: Key, transcription: transcription });
+            // console.log('Transcription saved to MongoDB:', savedTranscription);
+
+            res.status(200).json({ filteredTranscription }); 
+            console.log('Conversion & transcription completed!');
+
+            videoController.processVideo(Key);
+            console.log('openAIcontroller called');
         })
         .on('error', (err) => {
             console.error('An error occurred:', err.message);
@@ -164,4 +186,4 @@ function transcribeFile() {
         .save(`${windowsLocalFile}-audio.wav`); // Save the output file (not in order)
 };
 //runs the function on server load
-transcribeFile()
+// transcribeFile()

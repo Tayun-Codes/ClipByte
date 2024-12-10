@@ -20,7 +20,7 @@ ClipByte is built using the following technologies:
 - **aws-sdk**: Accesses S3 buckets for cloud storage and manipulation of large video files
 - **fluent-ffmpeg**: Command-line conversion of mp4 to wav files. Used for Remotion's transcribe function which requires wav files.
 - **@remotion/install-whisper-cpp**: Use of transcribe to retrieve a transcription of the user's video in order to be analyzed by OpenAI for clippable moments.
--**OpenAI**
+- **OpenAI**: 
 - **remotion packages incoming**
 
 # What I Learned

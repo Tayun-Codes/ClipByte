@@ -1,6 +1,6 @@
 const { Video } = require('remotion');
 
-function clip({ src, start, end }) {
+const Clip = ({ src, start, end }) => {
   const durationInFrames = (end - start) * 30; // Assuming 30fps
   return Video({
     src,
@@ -10,4 +10,4 @@ function clip({ src, start, end }) {
   });
 }
 
-module.exports = { clip };
+module.exports = { Clip };
