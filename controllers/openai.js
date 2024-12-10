@@ -43,7 +43,7 @@ module.exports = {
 
             // If the response is successful
             if (response && response.choices && response.choices.length > 0) {
-                const responseData = response.choices[0].message.content;
+                let responseData = response.choices[0].message.content;
 
                 // Prepare the output file path
                 const outputFilePath = path.join(transcribeFolderPath, `${Key}-openAiClips.json`);
@@ -143,4 +143,4 @@ let responseData = '```json const timestamps = [{ start: "00:01:27,340", end: "0
 
 
 // Call the function to process the file
-analyzeForClips(Key);
+// analyzeForClips(Key);

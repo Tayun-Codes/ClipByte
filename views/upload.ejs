@@ -38,11 +38,10 @@
             <h1>Upload!</h1>
             <a href="/logout" class="btn btn-default btn-sm">Logout</a>
         </div>
-
+        <p class="user">User: <%= user._id %> </p>
         <div class="row">
             <div class="col-xs-offset-3">
                 <div id="uploadForm" class="form-group">
-
                     <input type="text" class="form-control" placeholder="Filename" name="title" required>
                     <br>
                     <input id="fileUpload" type="file" name="video" accept="video/*" required>
@@ -79,24 +78,30 @@
                         s3.upload(params, function (err, data) {
                             if (err) {
                                 console.error('Upload Error:', err);
-                                alert('Failed to upload file.');
+                                console.og('Failed to upload file.');
                                 return;
                             }
                             stopwatch.end()
-                            alert('Successfully Uploaded! File URL: ' + data.Location);
+                            console.log('Successfully Uploaded! File URL: ' + data.Location);
 
                             //saves the key to the backend to be used in fetching URLs for bucket objects
                             //untested
+
+                            const user = document.querySelector('.user').innerText
+                            let userID = user.split(' ')
+
                             fetch('/transcribeKey', {
                                 method: 'POST',
                                 headers: {'Content-Type': 'application/json',},
                                 body: JSON.stringify({
+                                    userId: userID[1],
                                     Key: filePath,
                                 }),
                             })
-                                .then(response => response.json())
+                                // .then(response => response.json())
                                 .then(data => {
                                     console.log('Key saved', data);
+                                    window.location.href = '/process'
                                 })
                                 .catch(error => {
                                     console.error('Error sending Key', error);

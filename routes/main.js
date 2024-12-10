@@ -15,8 +15,8 @@ const awsKeys = require('../middleware/aws');
 router.get('/', homeController.getIndex);
 router.get('/upload', ensureAuth, awsKeys, uploadController.getUpload);
 router.post('/transcribeKey', transcribeController.transcribeFile)
-router.post('/process', openAiController.analyzeForClips)
-router.get('/completed', videoController.processVideo);
+router.get('/process', videoController.processVideo)
+
 router.get('/login', authController.getLogin);
 router.post('/login', authController.postLogin);
 router.get('/logout', authController.logout);

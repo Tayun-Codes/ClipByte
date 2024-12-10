@@ -4,6 +4,9 @@ const aws = require("aws-sdk");
 const fs = require('fs');
 var ffmpeg = require('fluent-ffmpeg');
 const openAiController = require('../controllers/openai');
+const videoController = require('./videoController');
+const User = require('../models/User')
+
 
 // const Transcription = require("../models/Transcription"); //for saving to mongodb but untested & not in use
 
@@ -28,6 +31,7 @@ const keys = {
 module.exports = {
     //Process: fetch aws file -> local -> convert to wav -> remotion transcription
     transcribeFile: async (req, res) => {
+
         console.log('transcribeFile running')
         //sent from upload.ejs, Key is the filePath in s3
         const { Key } = req.body;
@@ -64,9 +68,9 @@ module.exports = {
                         inputPath: path.resolve(__dirname, `.${localFilePath}-audio.wav`),
                         //gets the url but fetches it with the credentials
                         whisperPath: path.resolve(__dirname, '../remotion/whisper.cpp'),
-                        model: 'large-v3', //tiny, tiny.en, base, base.en, small, small.en, medium, medium.en, large-v1, large-v2, large-v3, large-v3-turbo
+                        model: 'medium.en', //tiny, tiny.en, base, base.en, small, small.en, medium, medium.en, large-v1, large-v2, large-v3, large-v3-turbo
                     });
-                    
+
                     const filteredTranscription = transcription.map(entry => {
                         const { tokens, ...rest } = entry; // Destructure to exclude the tokens field
                         return rest; // Return the modified object
@@ -79,14 +83,13 @@ module.exports = {
                     fs.writeFileSync(jsonFilePath, JSON.stringify({ filteredTranscription }, null, 2), 'utf-8'); //null = no modifications, 2 = 2 spaces for easier readibility
                     console.log(`Transcription saved to ${jsonFilePath}`);
 
-                    //save transcription to mongodb?... untested
-                    // const savedTranscription = await Transcription.create({ key: Key, transcription: transcription });
-                    // console.log('Transcription saved to MongoDB:', savedTranscription);
+                    console.log(req.body, 'REQ BODY')
+                    req.session.Key=req.body.Key                  
 
-                    res.status(200).json({ filteredTranscription }); 
                     console.log('Conversion & transcription completed!');
 
-                    videoController.processVideo(Key);
+                    // videoController.processVideo(Key, req, res);
+                    res.redirect('/process')
                     console.log('openAIcontroller called');
 
                     //need to call openai and send the key
@@ -107,7 +110,7 @@ module.exports = {
 async function downloadFileFromS3(filePath, localFilePath) {
     return new Promise((resolve, reject) => {
         const params = {
-            Bucket: process.env.BUCKETNAME, 
+            Bucket: process.env.BUCKETNAME,
             Key: filePath,
         };
 
@@ -137,53 +140,53 @@ async function downloadFileFromS3(filePath, localFilePath) {
 
 
 //hardcoding to see if transcription works
-function transcribeFile() {
-    console.log('transcribeFile running')
-    const windowsLocalFile = `.\\transcribeFiles\\The Archives Ep. Thanksgiving 2024 (video).mp4` //spaces are fine in the file name
-    ffmpeg(windowsLocalFile)
-        .audioCodec('pcm_s16le')    // Use the WAV codec
-        .audioFrequency(16000)      // Set the sample rate to 16kHz
-        .on('start', (commandLine) => {
-            console.log('FFmpeg process started with command:', commandLine);
-        })
-        .on('progress', (progress) => {
-            console.log(`Processing: ${progress.percent}% done`);
-        })
-        .on('end', async () => {
-            const { transcription } = await transcribe({
-                // inputPath: `E:\\Resilient_Coders\\Homework\\Github\\ClipByte\\transcribeFiles\\The Archives Ep. Thanksgiving 2024 (video).mp4-audio.wav`, //only absolute paths are working?
-                inputPath: path.resolve(__dirname, '..\\transcribeFiles\\The Archives Ep. Thanksgiving 2024 (video).mp4-audio.wav'),
-                // whisperPath: 'E:\\Resilient_Coders\\Homework\\Github\\ClipByte\\remotion\\whisper.cpp',
-                whisperPath: path.resolve(__dirname, '..\\remotion\\whisper.cpp'),
-                model: 'large-v2'
-            });
+// function transcribeFile() {
+//     console.log('transcribeFile running')
+//     const windowsLocalFile = `.\\transcribeFiles\\The Archives Ep. Thanksgiving 2024 (video).mp4` //spaces are fine in the file name
+//     ffmpeg(windowsLocalFile)
+//         .audioCodec('pcm_s16le')    // Use the WAV codec
+//         .audioFrequency(16000)      // Set the sample rate to 16kHz
+//         .on('start', (commandLine) => {
+//             console.log('FFmpeg process started with command:', commandLine);
+//         })
+//         .on('progress', (progress) => {
+//             console.log(`Processing: ${progress.percent}% done`);
+//         })
+//         .on('end', async () => {
+//             const { transcription } = await transcribe({
+//                 // inputPath: `E:\\Resilient_Coders\\Homework\\Github\\ClipByte\\transcribeFiles\\The Archives Ep. Thanksgiving 2024 (video).mp4-audio.wav`, //only absolute paths are working?
+//                 inputPath: path.resolve(__dirname, '..\\transcribeFiles\\The Archives Ep. Thanksgiving 2024 (video).mp4-audio.wav'),
+//                 // whisperPath: 'E:\\Resilient_Coders\\Homework\\Github\\ClipByte\\remotion\\whisper.cpp',
+//                 whisperPath: path.resolve(__dirname, '..\\remotion\\whisper.cpp'),
+//                 model: 'large-v2'
+//             });
 
-            const filteredTranscription = transcription.map(entry => {
-                const { tokens, offsets, ...rest } = entry; // Destructure to exclude the tokens field
-                return rest; // Return the modified object
-            });
+//             const filteredTranscription = transcription.map(entry => {
+//                 const { tokens, offsets, ...rest } = entry; // Destructure to exclude the tokens field
+//                 return rest; // Return the modified object
+//             });
 
-            //save transctiption as a local json
-            const jsonFilePath = `./transcribeFiles/The Archives Ep. Thanksgiving 2024 (video).mp4 filtered NO OFFSETS.json`;
+//             //save transctiption as a local json
+//             const jsonFilePath = `./transcribeFiles/The Archives Ep. Thanksgiving 2024 (video).mp4 filtered NO OFFSETS.json`;
 
 
-            fs.writeFileSync(jsonFilePath, JSON.stringify({ filteredTranscription }, null, 2), 'utf-8'); //null = no modifications, 2 = 2 spaces for easier readibility
-            console.log(`Transcription saved to ${jsonFilePath}`);
+//             fs.writeFileSync(jsonFilePath, JSON.stringify({ filteredTranscription }, null, 2), 'utf-8'); //null = no modifications, 2 = 2 spaces for easier readibility
+//             console.log(`Transcription saved to ${jsonFilePath}`);
 
-            //save transcription to mongodb?... untested
-            // const savedTranscription = await Transcription.create({ key: Key, transcription: transcription });
-            // console.log('Transcription saved to MongoDB:', savedTranscription);
+//             //save transcription to mongodb?... untested
+//             // const savedTranscription = await Transcription.create({ key: Key, transcription: transcription });
+//             // console.log('Transcription saved to MongoDB:', savedTranscription);
 
-            res.status(200).json({ filteredTranscription }); 
-            console.log('Conversion & transcription completed!');
+//             res.status(200).json({ filteredTranscription });
+//             console.log('Conversion & transcription completed!');
 
-            videoController.processVideo(Key);
-            console.log('openAIcontroller called');
-        })
-        .on('error', (err) => {
-            console.error('An error occurred:', err.message);
-        })
-        .save(`${windowsLocalFile}-audio.wav`); // Save the output file (not in order)
-};
-//runs the function on server load
-// transcribeFile()
+//             videoController.processVideo(Key);
+//             console.log('openAIcontroller called');
+//         })
+//         .on('error', (err) => {
+//             console.error('An error occurred:', err.message);
+//         })
+//         .save(`${windowsLocalFile}-audio.wav`); // Save the output file (not in order)
+// };
+// //runs the function on server load
+// // transcribeFile()

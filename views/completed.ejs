@@ -16,45 +16,20 @@
             <a href="/logout" class="btn btn-default btn-sm">Logout</a>
         </div>
 
-        <!-- <script type="module">
-        import { Player } from "https://cdn.jsdelivr.net/npm/@remotion/player/dist/index.esm.js";
-        const { RemotionVideo } = ${JSON.stringify(RemotionVideo())};
-
-        const playerContainer = document.getElementById('player');
-        RemotionVideo.forEach((clip) => {
-          const player = Player({
-            component: clip.component,
-            compositionWidth: clip.width,
-            compositionHeight: clip.height,
-            durationInFrames: clip.durationInFrames,
-            fps: clip.fps,
-            controls: true,
-          });
-          playerContainer.appendChild(player);
-        });
-      </script> -->
-
-        <!-- this does not use remotions video player but actually embeds a video with the start and end point! would be good to use jic i cant get the player working -->
-        <!-- <div id="clips">
-            <% clips.forEach(clip => { %>
-            <h2><%= clip.id %> (Duration: <%= clip.duration %> seconds)</h2>
-            <video controls>
-                <source src="<%= clip.src %>#t=<%= clip.start %>,<%= clip.end %>" type="video/mp4" />
-                Your browser does not support the video tag.
-            </video>
-            <% }) %>
-        </div> -->
-
-
-        <div id="clips">
-            <% clips.forEach((clip, index) => { %>
-              <h2>Clip <%= index + 1 %>: <%= clip.why %></h2>
-              <video controls width="800">
-                <source src="<%= clip %>" type="video/mp4" />
+        <!-- this does not use remotions video player but embeds a video with the start and end point! would be good to use jic i cant get the player working -->
+        <% if (clips.length > 0) { %> <!--condition to check that there is content within "clips" -->
+          <% clips.forEach(clip => { %>
+            <div id="clips">
+              <h2><%= clip.why %> </h2>
+              <h2><%= clip.start %>, <%= clip.end %> </h2>
+              <video controls>
+                <source src="<%= path %>#t=<%= clip.start %>,<%= clip.end %>" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
-            <% }) %>
-          </div>
+            </div>
+          <% }) %>
+        <% } %>
+
     </div>
 
     <script src="main.js"></script>

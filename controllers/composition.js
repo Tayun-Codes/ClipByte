@@ -1,5 +1,5 @@
 const { Composition } = require('remotion');
-const { Clip } = require('./clips');
+const { Clip } = require('./clip');
 
 const RemotionVideo = (videoSrc, start, end) => {
   return Composition({

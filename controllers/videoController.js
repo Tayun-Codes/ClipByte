@@ -8,29 +8,32 @@ require("dotenv").config({ path: "./config/.env" });
 
 
 //hardcoding -> Key will come from the end of transcribeFile from controllers/transcribe.js
-const Key = 'The Archives Ep. Thanksgiving 2024 (video).mp4 filtered' //first half'
-
+// const Key = 'The Archives Ep. Thanksgiving 2024 (video).mp4 filtered' //first half'
 
 // Set up the OpenAI API client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY, // Replace with your OpenAI API key
 });
 
-
 // Define the prompt to send to OpenAI
-const prompt = `From this file, identify standalone engaging segments throughout the entire video that are at least 30 seconds long, up to 60 seconds. These segments should be cohesive and meaningful, with a clear story, message, or entertaining content that can hold the audience's attention as standalone Instagram Reels. Export the results in this JSON format:
+const prompt = `From this file, identify standalone engaging segments throughout the entire video that are at least 30 seconds long, up to 60 seconds. These segments should be cohesive and meaningful, with a clear story, message, or entertaining content that can hold the audience's attention as standalone Instagram Reels. Only respond with the results in this JSON format:
 
-const timestamps = [
-{ start: <start-time>, end: <end-time>, why: <reason-for-selection> },
+[  { start: <start-time>, end: <end-time>, why: <reason-for-selection> },
+   { start: <start-time>, end: <end-time>, why: <reason-for-selection> }
 ];`;
 
 
 exports.processVideo = async (req, res) => {
-  const { Key } = req.body;
 
-  const analyzeForClips = async (Key, callback) => {
+  const Key = req.session.Key
+
+  let outPath = ''
+  let clips = ''
+
+  const analyzeForClips = async (callback) => {
     try {
-      console.log(Key, 'KEY in analyzeForClips');
+
+      // console.log(Key, 'KEY in analyzeForClips');
       console.log('analyzeForClips running!');
       // Define the folder where files are stored
       const transcribeFolderPath = path.join(__dirname, '..\\transcribeFiles');
@@ -62,21 +65,36 @@ exports.processVideo = async (req, res) => {
 
       // If the response is successful
       if (response && response.choices && response.choices.length > 0) {
-        const responseData = response.choices[0].message.content;
+        let responseData = response.choices[0].message.content;
+        console.log(responseData, 'RESPONSEDATA')
+
+        // Step 1: Extract the array from the response
+        let cleanedResponse = responseData
+          .replace(/```json|\n/g, '')           // Remove backticks and newlines (if any)
+          .replace(/`/g, '')
+          .trim();                             // Trim any extra spaces
+        console.log(cleanedResponse, 'CLEANED RESPONSE')
+
+        // Step 2: Parse the cleaned data to ensure valid JSON
+        let parsedData;
+        try {
+          parsedData = JSON.parse(cleanedResponse);
+        } catch (error) {
+          console.error("Error parsing JSON:", error);
+          return;
+        }
 
         // Prepare the output file path
         const outputFilePath = path.join(transcribeFolderPath, `${Key}-openAiClips.json`);
         console.log(outputFilePath, 'outputFilePath');
 
         // Save the response JSON to a file
-        fs.writeFileSync(outputFilePath, JSON.stringify(JSON.parse(responseData), null, 2));
+        fs.writeFileSync(outputFilePath, JSON.stringify(JSON.parse(cleanedResponse), null, 2));
         console.log(`The result has been saved to ${outputFilePath}`);
 
         // Calls controllers/videoController.getVideoClips when succesful
-        if (callback) {
-          console.log('Running callback after analyzeForClips...');
-          await callback(Key, outputFilePath, res); // Pass the file path or other relevant data to the callback
-        }
+        getVideoClips(Key, outputFilePath, res)
+
       } else {
         console.error('Error with OpenAI API response:', response);
       }
@@ -98,35 +116,45 @@ exports.processVideo = async (req, res) => {
       // Read and parse the JSON file
       const jsonData = await fsPromise.readFile(jsonPath, 'utf-8');
       const timestamps = JSON.parse(jsonData);
+      console.log(timestamps, 'TIMESTAMPS')
+      clips = timestamps
+      //double checks that timestamps is an array -> necessary to use map() and parse the necessary information for the videos
+      if (!Array.isArray(timestamps)) {
+        throw new Error("Invalid data: 'timestamps' must be an array.");
+      }
 
       // Render compositions for each timestamp range
-      const renderPromises = timestamps.map(async (clip, index) => {
-        const outputPath = path.resolve(__dirname, `../public/videos/${Key}/clip${index + 1}.mp4`);
-        console.log(outputPath, 'outputPath');
-        await render({
-          composition: RemotionVideo(videoPath, clip.start, clip.end),
-          codec: 'h264',
-          outputLocation: outputPath,
-        });
-        return {
-          src: `/videos/${Key}/clip${index + 1}.mp4`, // URL for the rendered clip
-          why: clip.why,
-        }
-      });
+      // const renderPromises = timestamps.map(async (clip, index) => {
+      // const outputPath = path.resolve(__dirname, `../public/videos/${Key}/clip${index + 1}.mp4`);
+      const outputPath = `../testmp4/test.mp4`;
+      outPath = outputPath
+      //   console.log(outputPath, 'outputPath');
+
+      //   await render({
+      //     composition: RemotionVideo(videoPath, clip.start, clip.end),
+      //     codec: 'h264',
+      //     outputLocation: outputPath,
+      //   });
+      //   return {
+      //     src: `/videos/${Key}/clip${index + 1}.mp4`, // URL for the rendered clip
+      //     why: clip.why,
+      //   }
+      // });
 
       // Wait for all renderings to complete
-      const renderedClips = await Promise.all(renderPromises);
-      console.log('Rendering completed:', renderedClips);
+      // const renderedClips = await Promise.all(renderPromises);
+      // console.log('Rendering completed:', renderedClips);
 
       // Render the player view with the rendered clip URLs
-      res.render('completed', { clips: renderedClips });
+      res.render('completed.ejs', { clips, path: outPath });
 
     } catch (error) {
       console.error('Error rendering video clips:', error);
       res.status(500).send('Error rendering video clips.');
     }
   };
-
   await analyzeForClips(Key, getVideoClips);
+
+
 
 };
