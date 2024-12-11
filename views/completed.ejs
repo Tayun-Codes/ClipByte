@@ -19,13 +19,14 @@
         <!-- this does not use remotions video player but embeds a video with the start and end point! would be good to use jic i cant get the player working -->
         <% if (clips.length > 0) { %> <!--condition to check that there is content within "clips" -->
           <% clips.forEach(clip => { %>
-            <div id="clips">
-              <h2><%= clip.why %> </h2>
-              <h2><%= clip.start %>, <%= clip.end %> </h2>
+            <div class="clips"> <!--  col-xs-offset-1 -->
+              <h2>From: <%= clip.start %> To:<%= clip.end %> </h2>
+              <span>Why: <%= clip.why %> </span>
               <video controls>
                 <source src="<%= path %>#t=<%= clip.start %>,<%= clip.end %>" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
+              <a href="<%= path %>" download>Download Full Video</a>
             </div>
           <% }) %>
         <% } %>

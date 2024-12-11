@@ -1,8 +1,5 @@
 module.exports = function (app, passport, db) {
-  const multer = require('multer')
-  const upload = multer({})
-  //where do I put this? ^^ 
-  
+
   // normal routes ===============================================================
 
   // show the home page (will also have our login links)

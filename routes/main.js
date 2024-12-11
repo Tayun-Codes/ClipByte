@@ -4,7 +4,6 @@ const authController = require('../controllers/auth');
 const homeController = require('../controllers/index');
 const uploadController = require('../controllers/upload');
 const transcribeController = require('../controllers/transcribe');
-const openAiController = require('../controllers/openai');
 const videoController = require('../controllers/videoController');
 
 const { ensureAuth, ensureGuest } = require('../middleware/auth');
